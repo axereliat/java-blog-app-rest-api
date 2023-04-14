@@ -3,6 +3,7 @@ package com.blogapp.service.impl;
 import com.blogapp.entity.Role;
 import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
+import com.blogapp.payload.AuthDto;
 import com.blogapp.payload.LoginDto;
 import com.blogapp.payload.RegisterDto;
 import com.blogapp.repository.RoleRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.blogapp.utils.AppConstants.ROLE_ADMIN;
@@ -46,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginDto loginDto) {
+    public AuthDto login(LoginDto loginDto) {
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(), loginDto.getPassword()));
@@ -55,7 +57,13 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtTokenProvider.generateToken(authentication);
 
-        return token;
+        Optional<User> temp = this.userRepository.findByEmail(loginDto.getUsernameOrEmail());
+        if (temp.isEmpty()) {
+            temp = this.userRepository.findByUsername(loginDto.getUsernameOrEmail());
+        }
+        User user = temp.get();
+
+        return new AuthDto(token, user.getId().toString(), user.getUsername());
     }
 
     @Override

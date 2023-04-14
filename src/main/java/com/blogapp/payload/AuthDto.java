@@ -7,13 +7,11 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class JWTAuthResponse {
+@NoArgsConstructor
+public class AuthDto {
 
-    private String accessToken;
-
-    private String tokenType = "Bearer";
+    private String token;
 
     private String userId;
 
