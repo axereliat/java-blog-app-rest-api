@@ -25,6 +25,4 @@ public class PostResponseDto {
     private String author;
 
     private String createdAt;
-
-    private List<CommentDto> comments;
 }

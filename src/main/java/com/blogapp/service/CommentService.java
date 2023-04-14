@@ -3,13 +3,13 @@ package com.blogapp.service;
 import com.blogapp.entity.Comment;
 import com.blogapp.payload.CommentDto;
 import com.blogapp.payload.CommentRequestDto;
+import com.blogapp.payload.PaginationDto;
 
 import java.security.Principal;
-import java.util.List;
 
 public interface CommentService {
 
-    List<CommentDto> getAll(long postId);
+    PaginationDto getAll(long postId, int page);
 
     CommentDto create(long postId, Principal principal, CommentRequestDto commentDto);
 

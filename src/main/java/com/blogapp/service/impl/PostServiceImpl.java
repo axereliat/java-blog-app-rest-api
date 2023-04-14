@@ -133,16 +133,6 @@ public class PostServiceImpl implements PostService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         postDto.setCreatedAt(post.getCreatedAt().format(formatter));
 
-        List<CommentDto> commentDtos = new ArrayList<>();
-
-        for (Comment comment : post.getComments()
-                .stream().sorted((a, b) -> b.getId().compareTo(a.getId())).collect(Collectors.toList())) {
-            CommentDto commentDto = this.commentService.transformEntityToDto(comment);
-            commentDtos.add(commentDto);
-        }
-
-        postDto.setComments(commentDtos);
-
         List<String> categoryNames = post.getCategories().stream().map(Category::getName).collect(Collectors.toList());
         postDto.setCategories(categoryNames);
 

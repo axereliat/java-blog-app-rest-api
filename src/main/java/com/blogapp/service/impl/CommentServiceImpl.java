@@ -5,14 +5,13 @@ import com.blogapp.entity.Post;
 import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
 import com.blogapp.exception.ResourceNotFoundException;
-import com.blogapp.payload.CommentDto;
-import com.blogapp.payload.CommentRequestDto;
-import com.blogapp.payload.CommentResponseDto;
-import com.blogapp.payload.UserDto;
+import com.blogapp.payload.*;
 import com.blogapp.repository.CommentRepository;
 import com.blogapp.repository.PostRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.service.CommentService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,8 @@ import java.util.List;
 
 @Service
 public class CommentServiceImpl implements CommentService {
+
+    public static final int PAGE_SIZE = 5;
 
     private final CommentRepository commentRepository;
 
@@ -38,15 +39,20 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentDto> getAll(long postId) {
-        List<Comment> comments = this.commentRepository.findAllByPostId(postId);
+    public PaginationDto getAll(long postId, int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+
+        List<Comment> comments = this.commentRepository.findAllByPostId(postId, pageable);
 
         List<CommentDto> commentResponseDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentResponseDtos.add(transformEntityToDto(comment));
         }
 
-        return commentResponseDtos;
+        return PaginationDto.builder()
+                .items(commentResponseDtos)
+                .page(page)
+                .build();
     }
 
     @Override
