@@ -41,8 +41,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public PaginationDto getAll(long postId, int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Pageable nextPageable = PageRequest.of(page + 1, PAGE_SIZE);
 
         List<Comment> comments = this.commentRepository.findAllByPostId(postId, pageable);
+        List<Comment> nextComments = this.commentRepository.findAllByPostId(postId, nextPageable);
 
         List<CommentDto> commentResponseDtos = new ArrayList<>();
         for (Comment comment : comments) {
@@ -52,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
         return PaginationDto.builder()
                 .items(commentResponseDtos)
                 .page(page)
+                .hasMore(!nextComments.isEmpty())
                 .build();
     }
 
@@ -102,6 +105,15 @@ public class CommentServiceImpl implements CommentService {
         }
 
         this.commentRepository.deleteById(commentId);
+    }
+
+
+    @Override
+    public void deleteCommentsFromPost(long postId) {
+        Post post = this.postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        this.commentRepository.deleteAll(post.getComments());
     }
 
     @Override

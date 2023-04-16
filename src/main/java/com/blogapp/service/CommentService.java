@@ -16,4 +16,6 @@ public interface CommentService {
     void delete(long commentId, long postId, Principal principal);
 
     CommentDto transformEntityToDto(Comment comment);
+
+    void deleteCommentsFromPost(long postId);
 }

@@ -1,8 +1,8 @@
 package com.blogapp.controller;
 
-import com.blogapp.entity.Post;
 import com.blogapp.payload.PostDto;
 import com.blogapp.payload.PostResponseDto;
+import com.blogapp.service.CommentService;
 import com.blogapp.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +16,11 @@ public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
+    private final CommentService commentService;
+
+    public PostController(PostService postService, CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     @GetMapping
@@ -50,6 +53,7 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Long id) {
+        this.commentService.deleteCommentsFromPost(id);
         this.postService.delete(id);
 
         return ResponseEntity.status(200).build();

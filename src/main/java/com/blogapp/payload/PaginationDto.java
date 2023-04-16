@@ -12,4 +12,6 @@ public class PaginationDto {
     private Object items;
 
     private Integer page;
+
+    private boolean hasMore;
 }

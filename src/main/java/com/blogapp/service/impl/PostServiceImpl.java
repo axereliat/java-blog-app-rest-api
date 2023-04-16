@@ -5,9 +5,7 @@ import com.blogapp.entity.Comment;
 import com.blogapp.entity.Post;
 import com.blogapp.entity.User;
 import com.blogapp.exception.ResourceNotFoundException;
-import com.blogapp.payload.CommentDto;
-import com.blogapp.payload.PostDto;
-import com.blogapp.payload.PostResponseDto;
+import com.blogapp.payload.*;
 import com.blogapp.repository.PostRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.service.CategoryService;
@@ -129,12 +127,24 @@ public class PostServiceImpl implements PostService {
         postDto.setId(post.getId());
         postDto.setContent(post.getContent());
         postDto.setTitle(post.getTitle());
-        postDto.setAuthor(post.getAuthor().getName());
+
+        UserDto userDto = UserDto.builder()
+                .id(post.getAuthor().getId())
+                .email(post.getAuthor().getEmail())
+                .name(post.getAuthor().getName())
+                .username(post.getAuthor().getUsername())
+                .build();
+
+        postDto.setAuthor(userDto);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         postDto.setCreatedAt(post.getCreatedAt().format(formatter));
 
-        List<String> categoryNames = post.getCategories().stream().map(Category::getName).collect(Collectors.toList());
-        postDto.setCategories(categoryNames);
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        for (Category category : post.getCategories()) {
+            categoryDtos.add(new CategoryDto(category.getId(), category.getName()));
+        }
+
+        postDto.setCategories(categoryDtos);
 
         return postDto;
     }

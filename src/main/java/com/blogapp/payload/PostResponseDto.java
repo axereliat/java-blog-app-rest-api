@@ -20,9 +20,9 @@ public class PostResponseDto {
 
     private String content;
 
-    private List<String> categories;
+    private List<CategoryDto> categories;
 
-    private String author;
+    private UserDto author;
 
     private String createdAt;
 }
