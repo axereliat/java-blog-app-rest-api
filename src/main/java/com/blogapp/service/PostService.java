@@ -1,14 +1,14 @@
 package com.blogapp.service;
 
+import com.blogapp.payload.PaginationDto;
 import com.blogapp.payload.PostDto;
 import com.blogapp.payload.PostResponseDto;
 
 import java.security.Principal;
-import java.util.List;
 
 public interface PostService {
 
-    List<PostResponseDto> getAll(Long[] categories);
+    PaginationDto getAll(Long[] categories, int page);
 
     PostResponseDto getById(long id);
 

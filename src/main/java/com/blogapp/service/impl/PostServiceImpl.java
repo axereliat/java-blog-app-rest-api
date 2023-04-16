@@ -1,7 +1,6 @@
 package com.blogapp.service.impl;
 
 import com.blogapp.entity.Category;
-import com.blogapp.entity.Comment;
 import com.blogapp.entity.Post;
 import com.blogapp.entity.User;
 import com.blogapp.exception.ResourceNotFoundException;
@@ -11,6 +10,8 @@ import com.blogapp.repository.UserRepository;
 import com.blogapp.service.CategoryService;
 import com.blogapp.service.CommentService;
 import com.blogapp.service.PostService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
+
+    private static final int PAGE_SIZE = 5;
 
     private final PostRepository postRepository;
 
@@ -39,10 +42,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getAll(Long[] categories) {
+    public PaginationDto getAll(Long[] categories, int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Pageable nextPageable = PageRequest.of(page + 1, PAGE_SIZE);
+
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
 
-        for (Post post : this.postRepository.findAll().stream()
+        List<Post> nextList = this.postRepository.findAll(nextPageable).stream()
+                .sorted((a, b) -> b.getId().compareTo(a.getId()))
+                .collect(Collectors.toList());
+
+        for (Post post : this.postRepository.findAll(pageable).stream()
                 .sorted((a, b) -> b.getId().compareTo(a.getId()))
                 .collect(Collectors.toList())) {
             List<Long> categoryIds = post.getCategories().stream().map(Category::getId).toList();
@@ -61,7 +71,11 @@ public class PostServiceImpl implements PostService {
             postResponseDtos.add(postResponseDto);
         }
 
-        return postResponseDtos;
+        return PaginationDto.builder()
+                .items(postResponseDtos)
+                .page(page)
+                .hasMore(!nextList.isEmpty())
+                .build();
     }
 
     @Override

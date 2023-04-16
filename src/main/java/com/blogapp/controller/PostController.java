@@ -1,5 +1,6 @@
 package com.blogapp.controller;
 
+import com.blogapp.payload.PaginationDto;
 import com.blogapp.payload.PostDto;
 import com.blogapp.payload.PostResponseDto;
 import com.blogapp.service.CommentService;
@@ -24,10 +25,11 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> index(@RequestParam(required = false) Long[] categories) {
-        List<PostResponseDto> posts = this.postService.getAll(categories);
+    public ResponseEntity<PaginationDto> index(@RequestParam(required = false) Long[] categories,
+                                               @RequestParam(required = false, defaultValue = "0") Integer page) {
+        PaginationDto paginationDto = this.postService.getAll(categories, page);
 
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(paginationDto);
     }
 
     @GetMapping("/{id}")
