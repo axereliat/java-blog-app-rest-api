@@ -25,4 +25,8 @@ public class PostResponseDto {
     private UserDto author;
 
     private String createdAt;
+
+    private int likes;
+
+    private boolean isLiked;
 }

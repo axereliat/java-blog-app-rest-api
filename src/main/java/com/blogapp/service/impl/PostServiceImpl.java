@@ -1,10 +1,12 @@
 package com.blogapp.service.impl;
 
 import com.blogapp.entity.Category;
+import com.blogapp.entity.Like;
 import com.blogapp.entity.Post;
 import com.blogapp.entity.User;
 import com.blogapp.exception.ResourceNotFoundException;
 import com.blogapp.payload.*;
+import com.blogapp.repository.LikeRepository;
 import com.blogapp.repository.PostRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.service.CategoryService;
@@ -12,6 +14,8 @@ import com.blogapp.service.CommentService;
 import com.blogapp.service.PostService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,12 +37,15 @@ public class PostServiceImpl implements PostService {
 
     private final CommentService commentService;
 
+    private final LikeRepository likeRepository;
+
     public PostServiceImpl(PostRepository postRepository, UserRepository userRepository,
-                           CategoryService categoryService, CommentService commentService) {
+                           CategoryService categoryService, CommentService commentService, LikeRepository likeRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.categoryService = categoryService;
         this.commentService = commentService;
+        this.likeRepository = likeRepository;
     }
 
     @Override
@@ -141,6 +148,19 @@ public class PostServiceImpl implements PostService {
         postDto.setId(post.getId());
         postDto.setContent(post.getContent());
         postDto.setTitle(post.getTitle());
+
+        List<Like> likes = this.likeRepository.findByPostId(post.getId());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        User user = this.userRepository.findByEmail(currentPrincipalName)
+                .orElseThrow(() -> new UsernameNotFoundException("Username could not be found"));
+
+        boolean liked = likes.stream().anyMatch(l -> l.getPost().getId().equals(post.getId())
+        && l.getUser().getId().equals(user.getId()));
+
+        postDto.setLikes(likes.size());
+        postDto.setLiked(liked);
 
         UserDto userDto = UserDto.builder()
                 .id(post.getAuthor().getId())
