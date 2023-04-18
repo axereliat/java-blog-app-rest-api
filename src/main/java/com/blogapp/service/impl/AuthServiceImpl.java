@@ -3,9 +3,11 @@ package com.blogapp.service.impl;
 import com.blogapp.entity.Role;
 import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
+import com.blogapp.exception.ResourceNotFoundException;
 import com.blogapp.payload.AuthDto;
 import com.blogapp.payload.LoginDto;
 import com.blogapp.payload.RegisterDto;
+import com.blogapp.payload.UserDto;
 import com.blogapp.repository.RoleRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.security.JwtTokenProvider;
@@ -98,5 +100,18 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return "User registered successfully!.";
+    }
+
+    @Override
+    public UserDto getProfileInformation(Long id) {
+        User user = this.userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("user", "id", id));
+
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
     }
 }

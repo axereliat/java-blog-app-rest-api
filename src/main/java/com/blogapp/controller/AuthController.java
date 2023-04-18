@@ -1,9 +1,6 @@
 package com.blogapp.controller;
 
-import com.blogapp.payload.AuthDto;
-import com.blogapp.payload.JWTAuthResponse;
-import com.blogapp.payload.LoginDto;
-import com.blogapp.payload.RegisterDto;
+import com.blogapp.payload.*;
 import com.blogapp.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +16,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // Build Login REST API
     @PostMapping(value = {"/login", "/signin"})
     public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto){
         AuthDto authDto = authService.login(loginDto);
@@ -32,10 +28,16 @@ public class AuthController {
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
-    // Build Register REST API
     @PostMapping(value = {"/register", "/signup"})
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
         String response = authService.register(registerDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<UserDto> profile(@PathVariable Long id) {
+        UserDto userDto = this.authService.getProfileInformation(id);
+
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 }
