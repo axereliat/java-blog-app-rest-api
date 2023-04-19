@@ -26,8 +26,9 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<PaginationDto> index(@RequestParam(required = false) Long[] categories,
+                                               @RequestParam(required = false, defaultValue = "") String keyword,
                                                @RequestParam(required = false, defaultValue = "0") Integer page) {
-        PaginationDto paginationDto = this.postService.getAll(categories, page);
+        PaginationDto paginationDto = this.postService.getAll(categories, keyword, page);
 
         return ResponseEntity.ok(paginationDto);
     }

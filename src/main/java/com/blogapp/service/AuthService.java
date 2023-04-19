@@ -1,9 +1,6 @@
 package com.blogapp.service;
 
-import com.blogapp.payload.AuthDto;
-import com.blogapp.payload.LoginDto;
-import com.blogapp.payload.RegisterDto;
-import com.blogapp.payload.UserDto;
+import com.blogapp.payload.*;
 
 public interface AuthService {
     AuthDto login(LoginDto loginDto);
@@ -11,4 +8,6 @@ public interface AuthService {
     String register(RegisterDto registerDto);
 
     UserDto getProfileInformation(Long id);
+
+    UserDto editProfile(ProfileDto profileDto);
 }

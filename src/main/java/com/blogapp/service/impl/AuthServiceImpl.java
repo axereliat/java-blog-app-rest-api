@@ -4,10 +4,7 @@ import com.blogapp.entity.Role;
 import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
 import com.blogapp.exception.ResourceNotFoundException;
-import com.blogapp.payload.AuthDto;
-import com.blogapp.payload.LoginDto;
-import com.blogapp.payload.RegisterDto;
-import com.blogapp.payload.UserDto;
+import com.blogapp.payload.*;
 import com.blogapp.repository.RoleRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.security.JwtTokenProvider;
@@ -17,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -106,6 +104,25 @@ public class AuthServiceImpl implements AuthService {
     public UserDto getProfileInformation(Long id) {
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("user", "id", id));
+
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
+    @Override
+    public UserDto editProfile(ProfileDto profileDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        User user = this.userRepository.findByEmail(currentPrincipalName)
+                .orElseThrow(() -> new UsernameNotFoundException("Username could not be found"));
+
+        user.setName(profileDto.getName());
+
+        this.userRepository.save(user);
 
         return UserDto.builder()
                 .id(user.getId())

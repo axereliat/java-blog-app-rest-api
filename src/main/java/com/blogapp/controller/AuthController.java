@@ -40,4 +40,11 @@ public class AuthController {
 
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
+
+    @PutMapping("/profile")
+    public ResponseEntity<UserDto> profileEdit(@RequestBody ProfileDto profileDto) {
+        UserDto userDto = this.authService.editProfile(profileDto);
+
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
 }

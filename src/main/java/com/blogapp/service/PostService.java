@@ -8,7 +8,7 @@ import java.security.Principal;
 
 public interface PostService {
 
-    PaginationDto getAll(Long[] categories, int page);
+    PaginationDto getAll(Long[] categories, String keyword, int page);
 
     PostResponseDto getById(long id);
 

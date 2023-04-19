@@ -49,17 +49,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PaginationDto getAll(Long[] categories, int page) {
+    public PaginationDto getAll(Long[] categories, String keyword, int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Pageable nextPageable = PageRequest.of(page + 1, PAGE_SIZE);
 
         List<PostResponseDto> postResponseDtos = new ArrayList<>();
 
         List<Post> nextList = this.postRepository.findAll(nextPageable).stream()
+                .filter(p -> p.getTitle().toLowerCase().contains(keyword.trim().toLowerCase()))
                 .sorted((a, b) -> b.getId().compareTo(a.getId()))
                 .collect(Collectors.toList());
 
         for (Post post : this.postRepository.findAll(pageable).stream()
+                .filter(p -> p.getTitle().toLowerCase().contains(keyword.trim().toLowerCase()))
                 .sorted((a, b) -> b.getId().compareTo(a.getId()))
                 .collect(Collectors.toList())) {
             List<Long> categoryIds = post.getCategories().stream().map(Category::getId).toList();
