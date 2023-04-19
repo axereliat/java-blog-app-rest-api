@@ -16,4 +16,8 @@ public class CommentDto {
     private UserDto createdBy;
 
     private String createdAt;
+
+    private int likes;
+
+    private boolean isLiked;
 }

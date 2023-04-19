@@ -6,6 +6,7 @@ import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
 import com.blogapp.exception.ResourceNotFoundException;
 import com.blogapp.payload.*;
+import com.blogapp.repository.CommentLikeRepository;
 import com.blogapp.repository.CommentRepository;
 import com.blogapp.repository.PostRepository;
 import com.blogapp.repository.UserRepository;
@@ -13,6 +14,8 @@ import com.blogapp.service.CommentService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +34,14 @@ public class CommentServiceImpl implements CommentService {
 
     private final UserRepository userRepository;
 
+    private final CommentLikeRepository commentLikeRepository;
+
     public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository, CommentLikeRepository commentLikeRepository) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.commentLikeRepository = commentLikeRepository;
     }
 
     @Override
@@ -118,6 +124,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto transformEntityToDto(Comment comment) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        User user = this.userRepository.findByEmail(currentPrincipalName)
+                .orElseThrow(() -> new UsernameNotFoundException("Username could not be found"));
+
         UserDto userDto = UserDto.builder()
                 .id(comment.getCreatedBy().getId())
                 .email(comment.getCreatedBy().getEmail())
@@ -125,11 +136,18 @@ public class CommentServiceImpl implements CommentService {
                 .name(comment.getCreatedBy().getName())
                 .build();
 
+        int likesCount = this.commentLikeRepository.findByCommentId(comment.getId()).size();
+
+        boolean isLiked = this.commentLikeRepository.findByUserAndComment(user, comment).stream().findFirst()
+                .isPresent();
+
         return CommentDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .createdBy(userDto)
                 .createdAt(comment.getCreatedAt().toString())
+                .likes(likesCount)
+                .isLiked(isLiked)
                 .build();
     }
 }

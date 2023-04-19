@@ -40,7 +40,7 @@ public class LikeServiceImpl implements LikeService {
                 .orElseThrow(() -> new ResourceNotFoundException("post", "id", postId));
 
         Like foundLike = this.likeRepository.findByUserAndPost(user, post)
-                .orElse(null);
+                .stream().findFirst().orElse(null);
 
         if (foundLike != null) {
             throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Post can be liked only once");
@@ -63,7 +63,8 @@ public class LikeServiceImpl implements LikeService {
         Post post = this.postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("post", "id", postId));
 
-        Like like = this.likeRepository.findByUserAndPost(user, post)
+        Like like = this.likeRepository.findByUserAndPost(user, post).stream()
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("like", "post id", postId));
 
         this.likeRepository.delete(like);
