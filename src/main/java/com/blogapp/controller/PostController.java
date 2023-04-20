@@ -5,9 +5,12 @@ import com.blogapp.payload.PostDto;
 import com.blogapp.payload.PostResponseDto;
 import com.blogapp.service.CommentService;
 import com.blogapp.service.PostService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
@@ -41,14 +44,15 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> create(@RequestBody PostDto postDto, Principal principal) {
+    public ResponseEntity create(@Valid @RequestBody PostDto postDto,
+                                                  Principal principal) {
         PostResponseDto post = this.postService.create(postDto, principal);
 
         return ResponseEntity.ok(post);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDto> update(@PathVariable Long id, @RequestBody PostDto postDto) {
+    public ResponseEntity<PostResponseDto> update(@PathVariable Long id, @Valid @RequestBody PostDto postDto) {
         PostResponseDto post = this.postService.update(id, postDto);
 
         return ResponseEntity.ok(post);

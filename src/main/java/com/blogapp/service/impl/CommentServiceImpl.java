@@ -1,6 +1,7 @@
 package com.blogapp.service.impl;
 
 import com.blogapp.entity.Comment;
+import com.blogapp.entity.CommentLike;
 import com.blogapp.entity.Post;
 import com.blogapp.entity.User;
 import com.blogapp.exception.BlogAPIException;
@@ -98,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Comment comment = this.commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", commentId));
 
         if (!user.getId().equals(comment.getCreatedBy().getId())) {
             throw new ResourceNotFoundException("Comment", "id", commentId);
@@ -110,6 +111,8 @@ public class CommentServiceImpl implements CommentService {
             throw new BlogAPIException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
 
+        List<CommentLike> byUserAndComment = this.commentLikeRepository.findByUserAndComment(user, comment);
+        this.commentLikeRepository.deleteById(byUserAndComment.get(0).getId());
         this.commentRepository.deleteById(commentId);
     }
 
