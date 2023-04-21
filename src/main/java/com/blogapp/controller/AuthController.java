@@ -3,8 +3,12 @@ package com.blogapp.controller;
 import com.blogapp.payload.*;
 import com.blogapp.service.AuthService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -41,9 +45,9 @@ public class AuthController {
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<UserDto> profileEdit(@RequestBody ProfileDto profileDto) {
-        UserDto userDto = this.authService.editProfile(profileDto);
+    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserDto> profileEdit(@RequestParam(required = false) MultipartFile avatar) throws IOException {
+        UserDto userDto = this.authService.editProfile(avatar, new ProfileDto(""));
 
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }

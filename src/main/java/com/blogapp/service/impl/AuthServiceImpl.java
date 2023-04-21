@@ -9,6 +9,7 @@ import com.blogapp.repository.RoleRepository;
 import com.blogapp.repository.UserRepository;
 import com.blogapp.security.JwtTokenProvider;
 import com.blogapp.service.AuthService;
+import com.blogapp.service.CloudinaryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +18,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -34,17 +38,20 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private JwtTokenProvider jwtTokenProvider;
 
+    private final CloudinaryService cloudinaryService;
+
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider, CloudinaryService cloudinaryService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -108,25 +115,34 @@ public class AuthServiceImpl implements AuthService {
         return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName())
+                .avatarUrl(user.getAvatarUrl())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .build();
     }
 
     @Override
-    public UserDto editProfile(ProfileDto profileDto) {
+    public UserDto editProfile(MultipartFile avatar, ProfileDto profileDto) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = authentication.getName();
         User user = this.userRepository.findByEmail(currentPrincipalName)
                 .orElseThrow(() -> new UsernameNotFoundException("Username could not be found"));
 
-        user.setName(profileDto.getName());
+        if (!profileDto.getName().isEmpty()) {
+            user.setName(profileDto.getName());
+        }
+
+        if (avatar != null) {
+            String avatarUrl = this.cloudinaryService.uploadImage(avatar);
+            user.setAvatarUrl(avatarUrl);
+        }
 
         this.userRepository.save(user);
 
         return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName())
+                .avatarUrl(user.getAvatarUrl())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .build();
